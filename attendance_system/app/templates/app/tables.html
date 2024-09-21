@@ -1,0 +1,52 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}
+table 
+{% endblock %}
+{% block content %}
+<main>
+    <div class="container-fluid px-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mt-4">Tables</h1>
+            <a href="{% url 'app:attendance_create'  %}" class="btn btn-outline-primary">Add Attendance</a>
+        </div>
+        
+     
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                Attendance DataTable
+            </div>
+            <div class="card-body">
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Is Present</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Is Present</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for data in all_attendance %}
+                        <tr>
+                            <td>{{data.student.first_name}} {{data.student.last_name}}</td>
+                            
+                            <td>{{data.date}}</td>
+                            <td>{{data.is_present}}</td>
+                        </tr>
+                        {% endfor %}
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock  %}

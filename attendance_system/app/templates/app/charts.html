@@ -1,0 +1,136 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}
+Charts
+{% endblock %}
+{% block content %}
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Charts</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+            <li class="breadcrumb-item active">Charts</li>
+        </ol>
+        
+        <div class="mb-4">
+            <form id="filterForm">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="monthSelect">Select Month:</label>
+                        <select id="monthSelect" class="form-select">
+                            <option value="">--Select Month--</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                   
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" id="filterButton" class="btn btn-primary">Apply Filter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-chart-area me-1"></i>
+                Monthly Chart
+            </div>
+            <div class="card-body"><canvas id="attendanceChart" width="100%" height="30"></canvas></div>
+            <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar me-1"></i>
+                        Weekly Chart
+                    </div>
+                    <form id="weeklyfilterForm">
+                        <div class="row px-4">
+                            <div class="col-md-4">
+                                <label for="Startdate">Start Date:</label>
+                                <input type="date" id="Startdate" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="enddate">End Date:</label>
+                                <input type="date" id="enddate" class="form-control">
+                            </div>
+                            <div class="col-md-4 d-flex align-items-end">
+                                <button type="button" id="WeeklyfilterButton" class="btn btn-primary">Apply Filter</button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="card-body"><canvas id="weeklyChart" width="100%" height="50"></canvas></div>
+                    <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    function renderChart(url, chartId, chartType, label) {
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.date);
+                const presentCounts = data.map(item => item.present_count);
+                
+                const ctx = document.getElementById(chartId).getContext('2d');
+                new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: label,
+                            data: presentCounts,
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    }
+
+    function updateMonthlyChart() {
+        const month = document.getElementById('monthSelect').value;
+        const monthlyUrl = `/dashboard/api/attendance/report/?type=monthly&month=${month}`;
+        renderChart(monthlyUrl, 'attendanceChart', 'line', 'Monthly Attendance');
+    }
+
+    function updateWeeklyChart() {
+        const startDate = document.getElementById('Startdate').value;
+        const endDate = document.getElementById('enddate').value;
+        const weeklyUrl = `/dashboard/api/attendance/report/?type=weekly&start_date=${startDate}&end_date=${endDate}`;
+        renderChart(weeklyUrl, 'weeklyChart', 'bar', 'Weekly Attendance');
+    }
+
+    document.getElementById('filterButton').addEventListener('click', updateMonthlyChart);
+    document.getElementById('WeeklyfilterButton').addEventListener('click', updateWeeklyChart);
+
+    renderChart('/dashboard/api/attendance/report/?type=monthly', 'attendanceChart', 'line', 'Monthly Attendance');
+    renderChart('/dashboard/api/attendance/report/?type=weekly', 'weeklyChart', 'bar', 'Weekly Attendance');
+</script>
+
+{% endblock %}
